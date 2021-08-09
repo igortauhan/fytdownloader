@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
-class download {
+class Download {
   String url;
   String path;
 
-  download(this.url, this.path);
+  Download(this.url, this.path);
 
   Future<bool> downloadVideo() async {
     String videoName = DateTime.now().millisecondsSinceEpoch.toString();

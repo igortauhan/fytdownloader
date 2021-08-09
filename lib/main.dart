@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:downloads_path_provider/downloads_path_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:fytdownloader/models/download.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,7 +30,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  final myController = TextEditingController();
+
   String downloadMessage = 'Paste the URL above and touch Download button';
+  late Download download;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.blueGrey,
                   margin: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
                   child: TextField(
+                    controller: myController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       hintText: 'Paste the URL video here',
@@ -72,7 +80,39 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.deepPurpleAccent.shade400,
                   margin: EdgeInsets.symmetric(horizontal: 70.0),
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      String url = myController.text;
+
+                      if (url == '') {
+                        setState(() {
+                          downloadMessage = 'The URL field cannot be void';
+                        });
+                        return;
+                      }
+
+                      setState(() {
+                        downloadMessage = 'Downloading...';
+                      });
+
+                      try {
+                        Directory directory = await DownloadsPathProvider.downloadsDirectory;
+                        String path = directory.path;
+                        download = new Download(url, path);
+                        bool status = await download.downloadVideo();
+
+                        setState(() {
+                          (status) ? downloadMessage = 'Download complete' : downloadMessage = 'An error occurred';
+                        });
+                      }
+                      on ArgumentError {
+                        setState(() {
+                          downloadMessage = 'An error occurred. Please, see if the URL is correct';
+                        });
+                      }
+                      catch (error) {
+                        downloadMessage = error.toString();
+                      }
+                    },
                     child: ListTile(
                       leading: Icon(
                         Icons.download_outlined,
